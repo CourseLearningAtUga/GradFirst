@@ -1,6 +1,5 @@
-# Install and load necessary libraries
+# Load necessary libraries
 library(tidyverse)
-library(gridExtra)
 
 # Load the dataset
 data <- read_csv("J:/My Drive/COLLEGE LEARNINGS/SEMESTER 1/GRAD FIRST/R/MERGED2007_08_PP.csv")
@@ -13,21 +12,29 @@ cleaned_data <- data %>%
 cleaned_data <- cleaned_data %>%
   mutate(MD_EARN_WNE_P10 = as.numeric(ifelse(MD_EARN_WNE_P10 %in% c("PrivacySuppressed"), NA, MD_EARN_WNE_P10)),
          ADM_RATE = as.numeric(ifelse(ADM_RATE %in% c("NULL"), NA, ADM_RATE)),
-         SAT_AVG = as.numeric(ifelse(SAT_AVG %in% c("NULL"), NA, SAT_AVG)))
+         SAT_AVG = as.numeric(ifelse(SAT_AVG %in% c("NULL"), NA, SAT_AVG)),
+         TUITIONFEE_IN = as.numeric(ifelse(TUITIONFEE_IN %in% c("NULL"), NA, TUITIONFEE_IN)))
 
-# Filter for institutions with IC Level FOUR YEAR and non-missing SAT_AVG, MD_EARN_WNE_P10, and ADM_RATE
+# Filter for institutions with IC Level FOUR YEAR and non-missing SAT_AVG, MD_EARN_WNE_P10, ADM_RATE, and TUITIONFEE_IN
 filtered_data <- cleaned_data %>% 
-  filter(ICLEVEL %in% c(1, 2, 3), !is.na(SAT_AVG), !is.na(MD_EARN_WNE_P10), !is.na(ADM_RATE))
+  filter(ICLEVEL %in% c(1, 2, 3), !is.na(SAT_AVG), !is.na(MD_EARN_WNE_P10), !is.na(ADM_RATE), !is.na(TUITIONFEE_IN))
 
 # Select relevant variables for analysis
 selected_data <- filtered_data %>% 
-  select(MD_EARN_WNE_P10, SAT_AVG, ADM_RATE, ICLEVEL)
+  select(MD_EARN_WNE_P10, SAT_AVG, ADM_RATE, TUITIONFEE_IN, ICLEVEL)
 
 # Define custom colors for ICLEVEL
-custom_colors <- c("1" = "red", "2" = "green", "3" = "blue")
+custom_colors <- c("four−year" = "red", "two−year" = "green", "certificate/non−degree" = "blue")
+
+# Recode ICLEVEL levels
+selected_data <- selected_data %>%
+  mutate(ICLEVEL = recode_factor(ICLEVEL,
+                                 `1` = "four−year",
+                                 `2` = "two−year",
+                                 `3` = "certificate/non−degree"))
 
 # Scatterplot for SAT_AVG vs. MD_EARN_WNE_P10 with ICLEVEL as color
-plot_sat_avg <- ggplot(selected_data, aes(x = SAT_AVG, y = MD_EARN_WNE_P10, color = factor(ICLEVEL))) +
+plot_sat_avg <- ggplot(selected_data, aes(x = SAT_AVG, y = MD_EARN_WNE_P10, color = ICLEVEL)) +
   geom_point() +
   labs(title = "SAT Average vs. Median Earnings by IC Level",
        x = "SAT Average",
@@ -36,7 +43,7 @@ plot_sat_avg <- ggplot(selected_data, aes(x = SAT_AVG, y = MD_EARN_WNE_P10, colo
   scale_color_manual(values = custom_colors)
 
 # Scatterplot for ADM_RATE vs. MD_EARN_WNE_P10 with ICLEVEL as color
-plot_adm_rate <- ggplot(selected_data, aes(x = ADM_RATE, y = MD_EARN_WNE_P10, color = factor(ICLEVEL))) +
+plot_adm_rate <- ggplot(selected_data, aes(x = ADM_RATE, y = MD_EARN_WNE_P10, color = ICLEVEL)) +
   geom_point() +
   labs(title = "Admission Rate vs. Median Earnings by IC Level",
        x = "Admission Rate",
@@ -44,5 +51,16 @@ plot_adm_rate <- ggplot(selected_data, aes(x = ADM_RATE, y = MD_EARN_WNE_P10, co
        color = "IC Level") +
   scale_color_manual(values = custom_colors)
 
-# Display both plots side by side
-grid.arrange(plot_sat_avg, plot_adm_rate, ncol = 2)
+# Scatterplot for TUITIONFEE_IN vs. MD_EARN_WNE_P10 with ICLEVEL as color
+plot_tuition_income <- ggplot(selected_data, aes(x = TUITIONFEE_IN, y = MD_EARN_WNE_P10, color = ICLEVEL)) +
+  geom_point() +
+  labs(title = "In-State Tuition vs. Median Earnings by IC Level",
+       x = "In-State Tuition",
+       y = "Median Earnings 10 Years After Entry",
+       color = "IC Level") +
+  scale_color_manual(values = custom_colors)
+
+# Display each plot in a separate window
+print(plot_sat_avg)
+print(plot_adm_rate)
+print(plot_tuition_income)
