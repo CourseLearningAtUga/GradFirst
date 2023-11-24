@@ -127,16 +127,13 @@ cleaned_data3 <- data %>%
 
 cleaned_data3 <- cleaned_data3 %>%
   mutate(MD_EARN_WNE_P10 = as.numeric(ifelse(MD_EARN_WNE_P10 %in% c("PrivacySuppressed"), NA, MD_EARN_WNE_P10)),
-         ADM_RATE = as.numeric(ifelse(ADM_RATE %in% c("NULL"), NA, ADM_RATE)),
-         MN_EARN_WNE_MALE0_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE0_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE0_P10)),
-         SAT_AVG = as.numeric(ifelse(SAT_AVG %in% c("NULL"), NA, SAT_AVG)),
-         TUITIONFEE_IN = as.numeric(ifelse(TUITIONFEE_IN %in% c("NULL"), NA, TUITIONFEE_IN)),
+
          AVGFACSAL = as.numeric(ifelse(AVGFACSAL %in% c("NULL"), NA, AVGFACSAL)),
          ICLEVEL = as.numeric(ifelse(ICLEVEL %in% c("NULL"), NA, ICLEVEL)))
 
 # Filter for non-missing AVGFACSAL, MN_EARN_WNE_MALE0_P10, and ICLEVEL
 filtered_data3 <- cleaned_data3 %>% 
-  filter(!is.na(AVGFACSAL), !is.na(MN_EARN_WNE_MALE0_P10), !is.na(ICLEVEL))
+  filter(!is.na(AVGFACSAL), !is.na(MD_EARN_WNE_P10), !is.na(ICLEVEL))
 
 # Recode ICLEVEL levels for Average Faculty Salary vs. Median Earnings
 filtered_data3 <- filtered_data3 %>%
@@ -147,7 +144,7 @@ filtered_data3 <- filtered_data3 %>%
   ))
 
 # Create a scatterplot for Average Faculty Salary vs. Median Earnings with colors based on IC_LEVEL
-plot_avgfacsal_income3 <- ggplot(filtered_data3, aes(x = AVGFACSAL, y = MN_EARN_WNE_MALE0_P10, color = IC_LEVEL)) +
+plot_avgfacsal_income3 <- ggplot(filtered_data3, aes(x = AVGFACSAL, y = MD_EARN_WNE_P10, color = IC_LEVEL)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "purple") +
   labs(title = "Average Faculty Salary vs. Median Earnings by IC Level",
@@ -158,4 +155,39 @@ plot_avgfacsal_income3 <- ggplot(filtered_data3, aes(x = AVGFACSAL, y = MN_EARN_
 
 # Print the Average Faculty Salary vs. Median Earnings plot
 print(plot_avgfacsal_income3)
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Clean data for Mean Income for Male vs. Female
+cleaned_data4 <- data %>% 
+  mutate_all(~ifelse(. %in% c("PrivacySuppressed", "NULL"), NA, .))
+
+cleaned_data4 <- cleaned_data4 %>%
+  mutate(MN_EARN_WNE_MALE0_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE0_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE0_P10)),
+         MN_EARN_WNE_MALE1_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE1_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE1_P10)),
+         ICLEVEL = as.numeric(ifelse(ICLEVEL %in% c("NULL"), NA, ICLEVEL)))
+
+# Filter for non-missing MN_EARN_WNE_MALE0_P10, MN_EARN_WNE_MALE1_P10, and ICLEVEL
+filtered_data4 <- cleaned_data4 %>% 
+  filter(!is.na(MN_EARN_WNE_MALE0_P10), !is.na(MN_EARN_WNE_MALE1_P10), !is.na(ICLEVEL))
+
+# Recode ICLEVEL levels for Mean Income for Male vs. Female
+filtered_data4 <- filtered_data4 %>%
+  mutate(IC_LEVEL = case_when(
+    ICLEVEL == 1 ~ "four−year",
+    ICLEVEL == 2 ~ "two−year",
+    ICLEVEL == 3 ~ "certificate/non−degree"
+  ))
+
+# Create a scatterplot for Mean Income for Male vs. Female with colors based on IC_LEVEL
+plot_male_female_income4 <- ggplot(filtered_data4, aes(x = MN_EARN_WNE_MALE1_P10, y = MN_EARN_WNE_MALE0_P10, color = IC_LEVEL)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "purple") +
+  labs(title = "Mean Income for Male vs. Female by IC Level",
+       x = "Mean Income for Male",
+       y = "Mean Income for Female",
+       color = "IC Level") +
+  scale_color_manual(values = c("four−year" = "red", "two−year" = "blue", "certificate/non−degree" = "green"))
+
+# Print the Mean Income for Male vs. Female plot
+print(plot_male_female_income4)
 
