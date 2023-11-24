@@ -51,15 +51,12 @@ cleaned_data1 <- data %>%
 
 cleaned_data1 <- cleaned_data1 %>%
   mutate(MD_EARN_WNE_P10 = as.numeric(ifelse(MD_EARN_WNE_P10 %in% c("PrivacySuppressed"), NA, MD_EARN_WNE_P10)),
-         ADM_RATE = as.numeric(ifelse(ADM_RATE %in% c("NULL"), NA, ADM_RATE)),
-         MN_EARN_WNE_MALE0_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE0_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE0_P10)),
          SAT_AVG = as.numeric(ifelse(SAT_AVG %in% c("NULL"), NA, SAT_AVG)),
-         TUITIONFEE_IN = as.numeric(ifelse(TUITIONFEE_IN %in% c("NULL"), NA, TUITIONFEE_IN)),
          ICLEVEL = as.numeric(ifelse(ICLEVEL %in% c("NULL"), NA, ICLEVEL)))
 
 # Filter for non-missing SAT_AVG, MN_EARN_WNE_MALE0_P10, and ICLEVEL
 filtered_data1 <- cleaned_data1 %>% 
-  filter(!is.na(SAT_AVG), !is.na(MN_EARN_WNE_MALE0_P10), !is.na(ICLEVEL))
+  filter(!is.na(SAT_AVG), !is.na(MD_EARN_WNE_P10), !is.na(ICLEVEL))
 
 # Recode ICLEVEL levels for SAT Average vs. Median Earnings
 filtered_data1 <- filtered_data1 %>%
@@ -70,7 +67,7 @@ filtered_data1 <- filtered_data1 %>%
   ))
 
 # Create a scatterplot for SAT Average vs. Median Earnings with colors based on IC_LEVEL
-plot_sat_avg_income1 <- ggplot(filtered_data1, aes(x = SAT_AVG, y = MN_EARN_WNE_MALE0_P10, color = IC_LEVEL)) +
+plot_sat_avg_income1 <- ggplot(filtered_data1, aes(x = SAT_AVG, y = MD_EARN_WNE_P10, color = IC_LEVEL)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "purple") +
   labs(title = "SAT Average vs. Median Earnings by IC Level",
@@ -91,15 +88,13 @@ cleaned_data2 <- data %>%
 
 cleaned_data2 <- cleaned_data2 %>%
   mutate(MD_EARN_WNE_P10 = as.numeric(ifelse(MD_EARN_WNE_P10 %in% c("PrivacySuppressed"), NA, MD_EARN_WNE_P10)),
-         ADM_RATE = as.numeric(ifelse(ADM_RATE %in% c("NULL"), NA, ADM_RATE)),
-         MN_EARN_WNE_MALE0_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE0_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE0_P10)),
-         SAT_AVG = as.numeric(ifelse(SAT_AVG %in% c("NULL"), NA, SAT_AVG)),
+
          TUITIONFEE_IN = as.numeric(ifelse(TUITIONFEE_IN %in% c("NULL"), NA, TUITIONFEE_IN)),
          ICLEVEL = as.numeric(ifelse(ICLEVEL %in% c("NULL"), NA, ICLEVEL)))
 
 # Filter for non-missing TUITIONFEE_IN, MN_EARN_WNE_MALE0_P10, and ICLEVEL
 filtered_data2 <- cleaned_data2 %>% 
-  filter(!is.na(TUITIONFEE_IN), !is.na(MN_EARN_WNE_MALE0_P10), !is.na(ICLEVEL))
+  filter(!is.na(TUITIONFEE_IN), !is.na(MD_EARN_WNE_P10), !is.na(ICLEVEL))
 
 # Recode ICLEVEL levels for In-State Tuition vs. Median Earnings
 filtered_data2 <- filtered_data2 %>%
@@ -110,7 +105,7 @@ filtered_data2 <- filtered_data2 %>%
   ))
 
 # Create a scatterplot for In-State Tuition vs. Median Earnings with colors based on IC_LEVEL
-plot_tuition_income2 <- ggplot(filtered_data2, aes(x = TUITIONFEE_IN, y = MN_EARN_WNE_MALE0_P10, color = IC_LEVEL)) +
+plot_tuition_income2 <- ggplot(filtered_data2, aes(x = TUITIONFEE_IN, y = MD_EARN_WNE_P10, color = IC_LEVEL)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "purple") +
   labs(title = "In-State Tuition vs. Median Earnings by IC Level",
