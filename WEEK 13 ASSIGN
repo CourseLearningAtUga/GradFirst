@@ -14,69 +14,36 @@ cleaned_data <- cleaned_data %>%
          ADM_RATE = as.numeric(ifelse(ADM_RATE %in% c("NULL"), NA, ADM_RATE)),
          SAT_AVG = as.numeric(ifelse(SAT_AVG %in% c("NULL"), NA, SAT_AVG)),
          TUITIONFEE_IN = as.numeric(ifelse(TUITIONFEE_IN %in% c("NULL"), NA, TUITIONFEE_IN)),
-         AVGFACSAL = as.numeric(ifelse(AVGFACSAL %in% c("NULL"), NA, AVGFACSAL)))
+         AVGFACSAL = as.numeric(ifelse(AVGFACSAL %in% c("NULL"), NA, AVGFACSAL)),
+         MN_EARN_WNE_MALE0_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE0_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE0_P10)),
+         MN_EARN_WNE_MALE1_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE1_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE1_P10)))
 
-# Filter for non-missing SAT_AVG, MD_EARN_WNE_P10, ADM_RATE, TUITIONFEE_IN, AVGFACSAL, and ICLEVEL
+# Filter for non-missing values
 filtered_data <- cleaned_data %>% 
-  filter(!is.na(SAT_AVG), !is.na(MD_EARN_WNE_P10), !is.na(ADM_RATE), !is.na(TUITIONFEE_IN), !is.na(AVGFACSAL), !is.na(ICLEVEL))
+  filter(!is.na(SAT_AVG), !is.na(MD_EARN_WNE_P10), !is.na(ADM_RATE), !is.na(TUITIONFEE_IN), 
+         !is.na(AVGFACSAL), !is.na(ICLEVEL), !is.na(MN_EARN_WNE_MALE0_P10), !is.na(MN_EARN_WNE_MALE1_P10))
 
-# Select relevant variables for analysis
-selected_data <- filtered_data %>% 
-  select(MD_EARN_WNE_P10, SAT_AVG, ADM_RATE, TUITIONFEE_IN, AVGFACSAL, ICLEVEL)
+# Convert ICLEVEL to numeric
+filtered_data <- filtered_data %>%
+  mutate(ICLEVEL = as.numeric(ICLEVEL))
+
+# Remove rows with NA values in ICLEVEL
+filtered_data <- filtered_data %>% 
+  filter(!is.na(ICLEVEL))
 
 # Recode ICLEVEL levels
-selected_data <- selected_data %>%
+filtered_data <- filtered_data %>%
   mutate(IC_LEVEL = case_when(
     ICLEVEL == 1 ~ "four−year",
     ICLEVEL == 2 ~ "two−year",
     ICLEVEL == 3 ~ "certificate/non−degree"
   ))
 
-# Define custom colors for IC_LEVEL
-custom_colors <- c("four−year" = "red", "two−year" = "green", "certificate/non−degree" = "blue")
+# Continue with the rest of your analysis...
 
-# Scatterplot for SAT_AVG vs. MD_EARN_WNE_P10 with colors based on IC_LEVEL and a loess curve
-plot_sat_avg <- ggplot(selected_data, aes(x = SAT_AVG, y = MD_EARN_WNE_P10, color = IC_LEVEL)) +
-  geom_point() +
-  geom_smooth(method = "loess", se = FALSE, color = "purple") +  # Add a loess curve
-  labs(title = "SAT Average vs. Median Earnings by IC Level",
-       x = "SAT Average",
-       y = "Median Earnings 10 Years After Entry",
-       color = "IC Level") +
-  scale_color_manual(values = custom_colors)
-
-# Scatterplot for ADM_RATE vs. MD_EARN_WNE_P10 with colors based on IC_LEVEL and a loess curve
-plot_adm_rate <- ggplot(selected_data, aes(x = ADM_RATE, y = MD_EARN_WNE_P10, color = IC_LEVEL)) +
-  geom_point() +
-  geom_smooth(method = "loess", se = FALSE, color = "purple") +  # Add a loess curve
-  labs(title = "Admission Rate vs. Median Earnings by IC Level",
-       x = "Admission Rate",
-       y = "Median Earnings 10 Years After Entry",
-       color = "IC Level") +
-  scale_color_manual(values = custom_colors)
-
-# Scatterplot for TUITIONFEE_IN vs. MD_EARN_WNE_P10 with colors based on IC_LEVEL and a loess curve
-plot_tuition_income <- ggplot(selected_data, aes(x = TUITIONFEE_IN, y = MD_EARN_WNE_P10, color = IC_LEVEL)) +
-  geom_point() +
-  geom_smooth(method = "loess", se = FALSE, color = "purple") +  # Add a loess curve
-  labs(title = "In-State Tuition vs. Median Earnings by IC Level",
-       x = "In-State Tuition",
-       y = "Median Earnings 10 Years After Entry",
-       color = "IC Level") +
-  scale_color_manual(values = custom_colors)
-
-# Scatterplot for AVGFACSAL vs. MD_EARN_WNE_P10 with colors based on IC_LEVEL and a loess curve
-plot_avgfacsal_income <- ggplot(selected_data, aes(x = AVGFACSAL, y = MD_EARN_WNE_P10, color = IC_LEVEL)) +
-  geom_point() +
-  geom_smooth(method = "loess", se = FALSE, color = "purple") +  # Add a loess curve
-  labs(title = "Average Faculty Salary vs. Median Earnings by IC Level",
-       x = "Average Faculty Salary",
-       y = "Median Earnings 10 Years After Entry",
-       color = "IC Level") +
-  scale_color_manual(values = custom_colors)
-
-# Display each plot in a separate window
+# Display the plots
 print(plot_sat_avg)
 print(plot_adm_rate)
 print(plot_tuition_income)
 print(plot_avgfacsal_income)
+print(plot_male_female_income)
