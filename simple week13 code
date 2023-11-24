@@ -13,11 +13,12 @@ cleaned_data <- cleaned_data %>%
   mutate(MD_EARN_WNE_P10 = as.numeric(ifelse(MD_EARN_WNE_P10 %in% c("PrivacySuppressed"), NA, MD_EARN_WNE_P10)),
          ADM_RATE = as.numeric(ifelse(ADM_RATE %in% c("NULL"), NA, ADM_RATE)),
          MN_EARN_WNE_MALE0_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE0_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE0_P10)),
+         SAT_AVG = as.numeric(ifelse(SAT_AVG %in% c("NULL"), NA, SAT_AVG)),
          ICLEVEL = as.numeric(ifelse(ICLEVEL %in% c("NULL"), NA, ICLEVEL)))
 
 # Filter for non-missing values
 filtered_data <- cleaned_data %>% 
-  filter(!is.na(ADM_RATE), !is.na(MN_EARN_WNE_MALE0_P10), !is.na(ICLEVEL))
+  filter(!is.na(SAT_AVG), !is.na(ADM_RATE), !is.na(MN_EARN_WNE_MALE0_P10), !is.na(ICLEVEL))
 
 # Recode ICLEVEL levels
 filtered_data <- filtered_data %>%
@@ -27,15 +28,15 @@ filtered_data <- filtered_data %>%
     ICLEVEL == 3 ~ "certificate/non−degree"
   ))
 
-# Create a scatterplot for Admission Rate vs. Median Earnings with colors based on IC_LEVEL
-plot_adm_rate_income <- ggplot(filtered_data, aes(x = ADM_RATE, y = MN_EARN_WNE_MALE0_P10, color = IC_LEVEL)) +
+# Create a scatterplot for SAT Average vs. Median Earnings with colors based on IC_LEVEL
+plot_sat_avg_income <- ggplot(filtered_data, aes(x = SAT_AVG, y = MN_EARN_WNE_MALE0_P10, color = IC_LEVEL)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "purple") +  # Add a polynomial fit
-  labs(title = "Admission Rate vs. Median Earnings by IC Level",
-       x = "Admission Rate",
+  labs(title = "SAT Average vs. Median Earnings by IC Level",
+       x = "SAT Average",
        y = "Median Earnings 10 Years After Entry",
        color = "IC Level") +
   scale_color_manual(values = c("four−year" = "red", "two−year" = "blue", "certificate/non−degree" = "green"))
 
 # Display the plot
-print(plot_adm_rate_income)
+print(plot_sat_avg_income)
