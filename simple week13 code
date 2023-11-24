@@ -1,0 +1,41 @@
+# Load necessary libraries
+library(tidyverse)
+
+# Load the dataset
+data <- read_csv("J:/My Drive/COLLEGE LEARNINGS/SEMESTER 1/GRAD FIRST/R/MERGED2007_08_PP.csv")
+
+# Handle missing values, "PrivacySuppressed," and NULL values
+cleaned_data <- data %>% 
+  mutate_all(~ifelse(. %in% c("PrivacySuppressed", "NULL"), NA, .))  # Convert "PrivacySuppressed" and "NULL" to NA
+
+# Convert relevant columns to numeric
+cleaned_data <- cleaned_data %>%
+  mutate(MD_EARN_WNE_P10 = as.numeric(ifelse(MD_EARN_WNE_P10 %in% c("PrivacySuppressed"), NA, MD_EARN_WNE_P10)),
+         ADM_RATE = as.numeric(ifelse(ADM_RATE %in% c("NULL"), NA, ADM_RATE)),
+         MN_EARN_WNE_MALE0_P10 = as.numeric(ifelse(MN_EARN_WNE_MALE0_P10 %in% c("PrivacySuppressed"), NA, MN_EARN_WNE_MALE0_P10)),
+         ICLEVEL = as.numeric(ifelse(ICLEVEL %in% c("NULL"), NA, ICLEVEL)))
+
+# Filter for non-missing values
+filtered_data <- cleaned_data %>% 
+  filter(!is.na(ADM_RATE), !is.na(MN_EARN_WNE_MALE0_P10), !is.na(ICLEVEL))
+
+# Recode ICLEVEL levels
+filtered_data <- filtered_data %>%
+  mutate(IC_LEVEL = case_when(
+    ICLEVEL == 1 ~ "four−year",
+    ICLEVEL == 2 ~ "two−year",
+    ICLEVEL == 3 ~ "certificate/non−degree"
+  ))
+
+# Create a scatterplot for Admission Rate vs. Median Earnings with colors based on IC_LEVEL
+plot_adm_rate_income <- ggplot(filtered_data, aes(x = ADM_RATE, y = MN_EARN_WNE_MALE0_P10, color = IC_LEVEL)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "purple") +  # Add a polynomial fit
+  labs(title = "Admission Rate vs. Median Earnings by IC Level",
+       x = "Admission Rate",
+       y = "Median Earnings 10 Years After Entry",
+       color = "IC Level") +
+  scale_color_manual(values = c("four−year" = "red", "two−year" = "blue", "certificate/non−degree" = "green"))
+
+# Display the plot
+print(plot_adm_rate_income)
