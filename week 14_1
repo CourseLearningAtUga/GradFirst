@@ -1,4 +1,56 @@
+# Assuming you have already loaded necessary libraries and read the dataset
+library(tidyverse)
+color = "blue"
 
+# Function for cleaning data
+clean_data <- function(data) {
+  cleaned_data <- data %>% 
+    mutate_all(~ifelse(. %in% c("PrivacySuppressed", "NULL"), NA, .))
+  
+  cleaned_data <- cleaned_data %>%
+    mutate(GRAD_DEBT_MDN = as.numeric(ifelse(GRAD_DEBT_MDN %in% c("PrivacySuppressed"), NA, GRAD_DEBT_MDN)),
+           CONTROL = factor(CONTROL, levels = c(3, 2, 1)))  # Change the order here
+  
+  # Filter for non-missing GRAD_DEBT_MDN and CONTROL
+  filtered_data <- cleaned_data %>% 
+    filter(!is.na(GRAD_DEBT_MDN), !is.na(CONTROL))
+  
+  return(filtered_data)
+}
+
+# Load the dataset
+data <- read_csv("J:/My Drive/COLLEGE LEARNINGS/SEMESTER 1/GRAD FIRST/R/MERGED2007_08_PP.csv")
+
+# Clean data for Median Debt
+filtered_data <- clean_data(data)
+
+# Create a new variable for CONTROL labels
+filtered_data <- filtered_data %>%
+  mutate(CONTROL_LABEL = factor(case_when(
+    CONTROL == 1 ~ "Public",
+    CONTROL == 2 ~ "Private Not-for-profit",
+    CONTROL == 3 ~ "For-profit"
+  ), levels = c("Public", "Private Not-for-profit", "For-profit")))
+
+
+# Plot histograms of median debt by institution type
+plot_median_debt_histograms <- ggplot(filtered_data, aes(x = GRAD_DEBT_MDN, fill = CONTROL_LABEL)) +
+  geom_histogram(binwidth = 800, position = "identity") +
+  facet_grid(CONTROL_LABEL ~ ., scales = "free_y", space = "free_y") +
+  labs(title = "Histogram of Median Debt for Completers by Institution Type",
+       x = "Median Debt",
+       y = "Frequency",
+       fill = "Institution Type") +
+  scale_fill_manual(values = c("Public" = color, "Private Not-for-profit" = color, "For-profit" = color)) +
+  theme_minimal()
+
+# Print the plot
+print(plot_median_debt_histograms)
+
+
+
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 # Assuming you have already loaded necessary libraries and read the dataset
