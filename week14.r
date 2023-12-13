@@ -75,3 +75,8 @@ new_plot <- grid.arrange(table_grob1)
 
 # Show the new plot
 print(new_plot)
+
+
+
+
+
